@@ -116,7 +116,7 @@ def read_water_flow(reset = True):
 def run_water(zone, minutes):
     GPIO.output(zone, GPIO.HIGH)
     time.sleep(minutes*60) # sleep for our duration with the solenoid open 
-    GPIO.output(s2, GPIO.LOW)
+    GPIO.output(zone, GPIO.LOW)
     
     return read_water_flow()
 
