@@ -30,4 +30,24 @@ ls /sys/bus/w1/devices
 # Take note of the DS18B20 sensor's address e.g. 28-0316853d8fff
 ```
 
-3) Clone this repo
+3) Clone this repo and cd into it
+
+4) Setup MariaDB
+```
+sudo apt install mariadb-server
+
+sudo mysql_secure_installation
+
+sudo mysql -u root -p
+
+> CREATE DATABASE irrigation;
+> CREATE USER 'irrigation'@localhost IDENTIFIED BY 'some-password';
+> GRANT ALL PRIVILEGES ON irrigation.* TO 'irrigation'@localhost;
+> FLUSH PRIVILEGES;
+> exit;
+
+cat << EOF > .db_user
+username: irrigation
+password: some-password
+EOF
+```
