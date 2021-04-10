@@ -67,6 +67,7 @@ Restart=on-abort
 [Install]
 WantedBy=multi-user.target
 ```
+```
 sudo chmod 644 /etc/systemd/system/water.service
 chmod +x /home/pi/wksp/irrigation_controller/measure_water.py
 sudo systemctl daemon-reload
