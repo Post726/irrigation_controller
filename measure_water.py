@@ -84,6 +84,7 @@ if __name__ == "__main__":
     logging.basicConfig(filename='/home/pi/water.log', format='%(asctime)s, %(message)s', level=logging.DEBUG)
     
     setup_pins()
+    shut_off_all_pins()
     
     # Create the I2C bus
     i2c = busio.I2C(board.SCL, board.SDA)
@@ -95,8 +96,9 @@ if __name__ == "__main__":
     
     GPIO.output(s1, GPIO.HIGH)
     
-    while(True):
-        time.sleep(60) # 1 Minute
+    for i in range(4):
+        time.sleep(15) # seconds
         
         do_logging(therm_sens)
         
+    GPIO.output(s1, GPIO.LOW)
