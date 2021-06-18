@@ -15,12 +15,11 @@ sudo apt-get install python3-w1thermsensor
 sudo apt-get install gnome-schedule
 
 sudo pip3 install --upgrade setuptools
+```
 
-pip3 install RPI.GPIO
-
-pip3 install adafruit-blinka
-
-sudo pip3 install adafruit-circuitpython-ads1x15
+3) Clone this repo and cd into it
+```
+pip3 install -r requirements.txt
 
 sudo modprobe w1-gpio
 
@@ -29,8 +28,6 @@ sudo modprobe w1-therm
 ls /sys/bus/w1/devices
 # Take note of the DS18B20 sensor's address e.g. 28-0316853d8fff
 ```
-
-3) Clone this repo and cd into it
 
 4) Setup MariaDB
 ```
@@ -67,6 +64,7 @@ Restart=on-abort
 [Install]
 WantedBy=multi-user.target
 ```
+
 ```
 sudo chmod 644 /etc/systemd/system/water.service
 chmod +x /home/pi/wksp/irrigation_controller/measure_water.py

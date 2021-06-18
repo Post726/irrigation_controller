@@ -1,2 +1,3 @@
 .db_user
-
+__pycache__
+.idea
