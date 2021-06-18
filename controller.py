@@ -35,7 +35,6 @@ def run_water(zone, minutes):
 
 if __name__ == "__main__":
     pin_controller.setup_pins()
-    sql_helper.setup() # sql_helper.setup(replace=True)
     
     schedule.every(1).day.at("22:00").do(run_water, zone1, 60)
     schedule.every(1).day.at("00:00").do(run_water, zone2, 60)
