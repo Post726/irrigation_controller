@@ -44,12 +44,28 @@ def setup(replace=False):
                                                 , {'name': 'end_ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
                                                 , {'name': 'gallons', 'type': 'FLOAT'}]
                                             , replace))
+            
+            cursor.execute(create_table_sql('moisture'
+                                            , [
+                                                {'name': 'ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+                                                , {'name': 'a0', 'type': 'FLOAT'}
+                                                , {'name': 'a1', 'type': 'FLOAT'}
+                                                , {'name': 'a2', 'type': 'FLOAT'}
+                                                , {'name': 'a3', 'type': 'FLOAT'}]
+                                            , replace))
 
 
 def insert_temperature(temp):
     with get_conn() as conn:
         with conn.cursor() as cursor:
             cursor.execute("INSERT INTO temperature (temp) VALUES (?)", (temp,))
+            conn.commit()
+
+
+def insert_moistures(a0, a1, a2, a3):
+    with get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("INSERT INTO moisture (a0, a1, a2, a3) VALUES (?, ?, ?, ?)", (a0, a1, a2, a3))
             conn.commit()
 
 
@@ -66,6 +82,14 @@ def get_temperatures():
             cursor.execute("SELECT * FROM temperature ORDER BY ts")
             
             return [{'ts': ts, 'temperature': temp} for (ts, temp) in cursor]
+
+
+def get_moistures():
+    with get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM moisture ORDER BY ts")
+            
+            return [{'ts': ts, 'a0': a0, 'a1': a1, 'a2': a2, 'a3': a3} for (ts, a0, a1, a2, a3) in cursor]
 
 
 def get_water():
