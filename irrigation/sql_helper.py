@@ -25,36 +25,84 @@ def create_table_sql(name, columns, replace=False):
     return sql
 
 
-def setup(replace=False):
-    with get_conn(database=None) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute("CREATE DATABASE IF NOT EXISTS irrigation")
-            
-    with get_conn() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(create_table_sql('temperature'
-                                            , [
-                                                {'name': 'ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-                                                , {'name': 'temp', 'type': 'FLOAT'}]
-                                            , replace))
-            
-            cursor.execute(create_table_sql('water'
-                                            , [
-                                                {'name': 'zone', 'type': 'INT'}
-                                                , {'name': 'alias', 'type': 'VARCHAR(128)'}
-                                                , {'name': 'start_ts', 'type': 'TIMESTAMP NOT NULL'}
-                                                , {'name': 'end_ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-                                                , {'name': 'gallons', 'type': 'FLOAT'}]
-                                            , replace))
-            
-            cursor.execute(create_table_sql('moisture'
-                                            , [
-                                                {'name': 'ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
-                                                , {'name': 'a0', 'type': 'FLOAT'}
-                                                , {'name': 'a1', 'type': 'FLOAT'}
-                                                , {'name': 'a2', 'type': 'FLOAT'}
-                                                , {'name': 'a3', 'type': 'FLOAT'}]
-                                            , replace))
+class Schema:
+    def setup(self, replace=False):
+        with get_conn(database=None) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("CREATE DATABASE IF NOT EXISTS irrigation")
+
+        with get_conn() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(create_table_sql('zones'
+                                                , [
+                                                    {'name': 'id', 'type': 'INT NOT NULL'}
+                                                    , {'name': 'name', 'type': 'VARCHAR(128)'}
+                                                    , {'name': 'disabled', 'type': 'BOOLEAN DEFAULT TRUE'}
+                                                    , {'name': 'interval_days', 'type': 'INT'}
+                                                    , {'name': 'scheduled_time', 'type': 'TIMESTAMP'}
+                                                    , {'name': 'duration_minutes', 'type': 'INT'}]
+                                                , replace))
+                if replace:
+                    cursor.executemany("INSERT INTO zones (id) VALUES (?)", [(1,), (2,), (3,), (4,), (5,), (6,)])
+
+                cursor.execute(create_table_sql('temperature'
+                                                , [
+                                                    {'name': 'ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+                                                    , {'name': 'temp', 'type': 'FLOAT'}]
+                                                , replace))
+
+                cursor.execute(create_table_sql('water'
+                                                , [
+                                                    {'name': 'zone', 'type': 'INT'}
+                                                    , {'name': 'alias', 'type': 'VARCHAR(128)'}
+                                                    , {'name': 'start_ts', 'type': 'TIMESTAMP NOT NULL'}
+                                                    , {'name': 'end_ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+                                                    , {'name': 'gallons', 'type': 'FLOAT'}]
+                                                , replace))
+
+                cursor.execute(create_table_sql('moisture'
+                                                , [
+                                                    {'name': 'ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
+                                                    , {'name': 'a0', 'type': 'FLOAT'}
+                                                    , {'name': 'a1', 'type': 'FLOAT'}
+                                                    , {'name': 'a2', 'type': 'FLOAT'}
+                                                    , {'name': 'a3', 'type': 'FLOAT'}]
+                                                , replace))
+
+
+class Zone:
+    TABLENAME = "zones"
+
+    def update(self, zone, name=None, disabled=False, interval_days=None, scheduled_time=None, duration_minutes=None):
+        query = f"UPDATE {self.TABLENAME} SET "
+        values = ()
+
+        if name:
+            query += f'name = ?, '
+            values += (name,)
+        if disabled:
+            query += f'disabled = ?, '
+            values += (disabled,)
+        if interval_days:
+            query += f'interval_days = ?, '
+            values += (interval_days,)
+        if scheduled_time:
+            query += f'scheduled_time = ?, '
+            values += (scheduled_time,)
+        if duration_minutes:
+            query += f'duration_minutes = ?, '
+            values += (duration_minutes,)
+
+        query = query[:-2]  # remove trailing comma
+        query += "WHERE id = ?"
+        values += (zone,)
+
+        print(query)
+
+        with get_conn() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, values)
+                conn.commit()
 
 
 def insert_temperature(temp):
@@ -78,22 +126,12 @@ def insert_water(zone, alias, start_ts, gallons):
             conn.commit()
 
 
-def get_list(table):
-    if table not in ['water', 'temperature', 'moisture']:
-        raise ValueError(f'{table} is not a known table!')
-
+def get_list(self, where_clause, values):
     with get_conn() as conn:
         with conn.cursor() as cursor:
-            cursor.execute(f"SELECT * FROM {table}")
+            cursor.execute(f"SELECT * FROM {self.TABLENAME} {where_clause}", values)
 
             columns = [col[0] for col in cursor.description]
             rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
             return rows
-
-# setup(replace=True)
-# insert_water('2020-01-01 00:00:00', 5)
-# insert_temperature(56)
-# insert_temperature(57)
-# print(get_temperatures())
-# print(get_water())
