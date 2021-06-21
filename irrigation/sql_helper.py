@@ -40,7 +40,9 @@ def setup(replace=False):
             
             cursor.execute(create_table_sql('water'
                                             , [
-                                                {'name': 'start_ts', 'type': 'TIMESTAMP NOT NULL'}
+                                                {'name': 'zone', 'type': 'INT'}
+                                                , {'name': 'alias', 'type': 'VARCHAR(128)'}
+                                                , {'name': 'start_ts', 'type': 'TIMESTAMP NOT NULL'}
                                                 , {'name': 'end_ts', 'type': 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'}
                                                 , {'name': 'gallons', 'type': 'FLOAT'}]
                                             , replace))
@@ -69,35 +71,25 @@ def insert_moistures(a0, a1, a2, a3):
             conn.commit()
 
 
-def insert_water(start_ts, gallons):
+def insert_water(zone, alias, start_ts, gallons):
     with get_conn() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO water (start_ts, gallons) VALUES (?, ?)", (start_ts, gallons))
+            cursor.execute("INSERT INTO water (zone, alias, start_ts, gallons) VALUES (?, ?)", (zone, alias, start_ts, gallons))
             conn.commit()
 
 
-def get_temperatures():
+def get_list(table):
+    if table not in ['water', 'temperature', 'moisture']:
+        raise ValueError(f'{table} is not a known table!')
+
     with get_conn() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM temperature ORDER BY ts")
-            
-            return [{'ts': ts, 'temperature': temp} for (ts, temp) in cursor]
+            cursor.execute(f"SELECT * FROM {table}")
 
+            columns = [col[0] for col in cursor.description]
+            rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-def get_moistures():
-    with get_conn() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM moisture ORDER BY ts")
-            
-            return [{'ts': ts, 'a0': a0, 'a1': a1, 'a2': a2, 'a3': a3} for (ts, a0, a1, a2, a3) in cursor]
-
-
-def get_water():
-    with get_conn() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM water ORDER BY start_ts")
-            
-            return [{'start_ts': start_ts, 'end_ts': end_ts, 'gallons': gallons} for (start_ts, end_ts, gallons) in cursor]
+            return rows
 
 # setup(replace=True)
 # insert_water('2020-01-01 00:00:00', 5)

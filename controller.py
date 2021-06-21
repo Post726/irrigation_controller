@@ -1,10 +1,37 @@
 from irrigation import pin_controller, sql_helper
-from irrigation.pin_controller import s1 as zone1, s2 as zone2, s3 as zone3, s4 as zone4, s5 as zone5, s6 as zone6
+from irrigation.pin_controller import s1 , s2 , s3, s4, s5, s6
 from irrigation.pin_controller import a0 as analog0, a1 as analog1, a2 as analog2, a3 as analog3
 from datetime import datetime
 import time
 import schedule
 
+
+zones = {
+    1: {
+        'pin': s1,
+        'alias': 'tomatoes and corn'
+    },
+    2: {
+        'pin': s2,
+        'alias': ''
+    },
+    3: {
+        'pin': s3,
+        'alias': 'strawberries and onions'
+    },
+    4: {
+        'pin': s4,
+        'alias': 'horse shoe'
+    },
+    5: {
+        'pin': s5,
+        'alias': ''
+    },
+    6: {
+        'pin': s6,
+        'alias': ''
+    }
+}
 
 def run_water(zone, minutes):
     start_time = datetime.now()
@@ -23,12 +50,12 @@ def run_water(zone, minutes):
     print(f"Moisture2: {moisture2}")
     print(f"Moisture3: {moisture3}")
     
-    pin_controller.set_high(zone)
+    pin_controller.set_high(zones[zone]['pin'])
     time.sleep(minutes*60) # sleep for our duration with the solenoid open 
-    pin_controller.set_low(zone)
+    pin_controller.set_low(zones[zone]['pin'])
     
     water_used = pin_controller.read_water_flow()    
-    sql_helper.insert_water(start_time, water_used)
+    sql_helper.insert_water(zone, zones[zone]['alias'], start_time, water_used)
     
     print(f"Water (Gallons): {water_used}")
 
@@ -36,12 +63,12 @@ def run_water(zone, minutes):
 if __name__ == "__main__":
     pin_controller.setup_pins()
     
-    schedule.every(1).day.at("22:00").do(run_water, zone1, 60)
-    schedule.every(1).day.at("00:00").do(run_water, zone2, 60)
-    schedule.every(1).day.at("02:00").do(run_water, zone3, 60)
-    #schedule.every(1).day.at("04:00").do(run_water, zone4, 60)
-    #schedule.every(1).day.at("06:00").do(run_water, zone5, 60)
-    #schedule.every(1).day.at("20:00").do(run_water, zone6, 60)
+    schedule.every(1).day.at("22:00").do(run_water, 1, 60)
+    # schedule.every(1).day.at("12:00").do(run_water, 2, 60)
+    schedule.every(1).day.at("24:00").do(run_water, 3, 60)
+    schedule.every(1).day.at("02:00").do(run_water, 4, 60)
+    # schedule.every(1).day.at("06:00").do(run_water, 5, 60)
+    # schedule.every(1).day.at("20:00").do(run_water, 6, 60)
     
     # Testing
     # schedule.run_all()
