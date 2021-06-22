@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 import json
 from irrigation import sql_helper
 
@@ -15,7 +15,12 @@ def add_headers(response):
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return render_template("home.html")
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
 
 @app.route("/data", methods=["GET"])
