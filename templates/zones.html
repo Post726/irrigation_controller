@@ -1,23 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
 <head>
-    <title>Zones</title>
+    <meta charset="utf-8">
+    <title>About Flask</title>
 </head>
 <body>
 {% extends "template.html" %}
 {% block content %}
-<h1> Zones </h1>
+
+{% if zonesForm.errors %}
+    <ul class="errors">
+        {% for field_name, field_errors in zonesForm.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+                <li>{{ zonesForm[field_name].label }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if message %}
+  <div class="alert success">
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+    {{ message }}
+  </div>
+{% endif %}
 
 <form method='post'>
-    <h2>Zone 1</h2>
-    <b>Name</b> <input type="text" name="name_1"><br>
-    <b>Disabled</b> <input type="checkbox" name="disabled_1" checked><br>
-    <b>Interval (days)</b> <input type="number" name="interval_days_1" min="1" max="7" value="1"><br>
-    <b>Time</b> <input type="time" name="scheduled_time_1"><br>
-    <b>Duration (minutes)</b> <input type="number" name="duration_minutes_1" min="1" max="1440" value="60"><br>
-
-    <input type="submit" name="submit" value="Submit">
-    <input type="reset" name="reset" value="Reset"><br>
+  {{ zonesForm.hidden_tag() }}
+  <dl>
+    {% for zone in zonesForm.zones %}
+      <h1>Zone {{ zone.number.data }}</h2>
+      <div>{{ zone.disabled.label }}: {{ zone.disabled }}</div>
+      <div>{{ zone.alias.label }}: {{ zone.alias }}</div>
+      <div>{{ zone.interval_days.label }}: {{ zone.interval_days }}</div>
+      <div>{{ zone.scheduled_time.label }}: {{ zone.scheduled_time }}</div>
+      <div>{{ zone.duration_minutes.label }}: {{ zone.duration_minutes }}</div>
+    {% endfor %}
+  </dl>
+  <p>{{ zonesForm.submit }}
 </form>
 {% endblock %}
 </body>

@@ -7,4 +7,3 @@ schedule
 flask_sqlalchemy
 WTForms
 Flask-WTF
-Flask-Bootstrap4

@@ -4,36 +4,29 @@ from irrigation.board import a0 as analog0, a1 as analog1, a2 as analog2, a3 as 
 from datetime import datetime
 import time
 import schedule
+import sys
 
+from flask import Flask, current_app
+import app
+from config import Config
+from models import db
 
-zones = {
-    1: {
-        'pin': s1,
-        'alias': 'tomatoes and corn'
-    },
-    2: {
-        'pin': s2,
-        'alias': ''
-    },
-    3: {
-        'pin': s3,
-        'alias': 'strawberries and onions'
-    },
-    4: {
-        'pin': s4,
-        'alias': 'horse shoe'
-    },
-    5: {
-        'pin': s5,
-        'alias': ''
-    },
-    6: {
-        'pin': s6,
-        'alias': ''
-    }
+app = Flask(__name__)
+app.config.from_object(Config)
+db.init_app(app)
+
+from models import Zone
+
+pins = {
+    1: s1,
+    2: s2,
+    3: s3,
+    4: s4,
+    5: s5,
+    6: s6,
 }
 
-def run_water(zone, minutes):
+def run_water(zone, alias, minutes):
     start_time = datetime.now()
     print()
     
@@ -51,23 +44,31 @@ def run_water(zone, minutes):
     print(f"Moisture2: {moisture2}")
     print(f"Moisture3: {moisture3}")
     
-    board.set_high(zones[zone]['pin'])
+    board.set_high(pins[zone])
     time.sleep(minutes*60) # sleep for our duration with the solenoid open 
-    board.set_low(zones[zone]['pin'])
+    board.set_low(pins[zone])
     
     water_used = board.read_water_flow()    
-    sql_helper.Water().insert(zone, zones[zone]['alias'], start_time, water_used)
+    sql_helper.Water().insert(zone, alias, start_time, water_used)
     
     print(f"Water (Gallons): {water_used}")
 
 
 if __name__ == "__main__":
     board.setup_pins()
+    board.shut_off_all_pins()
     
-    schedule.every(1).day.at("20:00").do(run_water, 1, 60)
-    # schedule.every(1).day.at("12:00").do(run_water, 2, 60)
-    schedule.every(1).day.at("22:00").do(run_water, 3, 60)
-    schedule.every(1).day.at("00:00").do(run_water, 4, 60)
+    with app.app_context():
+        for zone in Zone.query.all():
+            if not zone.disabled:
+                print(zone.alias)
+                sys.stdout.flush()
+                schedule.every(zone.interval_days).day.at(zone.scheduled_time.strftime("%H:%M")).do(run_water, zone.number, zone.alias, zone.duration_minutes)
+    
+    #schedule.every(1).day.at("22:00").do(run_water, 1, 60)
+    #schedule.every(1).day.at("00:00").do(run_water, 2, 60)
+    #schedule.every(1).day.at("02:00").do(run_water, 3, 60)
+    #schedule.every(1).day.at("04:00").do(run_water, 4, 60)
     # schedule.every(1).day.at("06:00").do(run_water, 5, 60)
     # schedule.every(1).day.at("20:00").do(run_water, 6, 60)
     
