@@ -65,13 +65,6 @@ if __name__ == "__main__":
                 sys.stdout.flush()
                 schedule.every(zone.interval_days).day.at(zone.scheduled_time.strftime("%H:%M")).do(run_water, zone.number, zone.alias, zone.duration_minutes)
     
-    #schedule.every(1).day.at("22:00").do(run_water, 1, 60)
-    #schedule.every(1).day.at("00:00").do(run_water, 2, 60)
-    #schedule.every(1).day.at("02:00").do(run_water, 3, 60)
-    #schedule.every(1).day.at("04:00").do(run_water, 4, 60)
-    # schedule.every(1).day.at("06:00").do(run_water, 5, 60)
-    # schedule.every(1).day.at("20:00").do(run_water, 6, 60)
-    
     # Testing
     # schedule.run_all()
     # exit()

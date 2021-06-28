@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">Water</div>
+  <!-- Table -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Zone</th>
+        <th>Alias</th>
+        <th>Start Time</th>
+        <th>End Time Time</th>
+        <th>Water (gallons)</th>
+      <tr>
+    </thead>
+    <tbody>
+    {% for record in water %}
+      <tr>
+        <td>{{ record.zone }}</td>
+        <td>{{ record.alias }}</td>
+        <td>{{ record.start_ts }}</td>
+        <td>{{ record.end_ts }}</td>
+        <td>{{ record.gallons }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

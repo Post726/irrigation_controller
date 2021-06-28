@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="utf-8">
-    <title>About Flask</title>
-</head>
-<body>
-{% extends "template.html" %}
-{% block content %}
+{% extends "base.html" %}
 
+{% block content %}
 {% if zonesForm.errors %}
     <ul class="errors">
         {% for field_name, field_errors in zonesForm.errors|dictsort if field_errors %}
@@ -19,26 +12,25 @@
 {% endif %}
 
 {% if message %}
-  <div class="alert success">
-    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     {{ message }}
   </div>
 {% endif %}
 
-<form method='post'>
+<form method='post' class="navbar-form navbar-left">
   {{ zonesForm.hidden_tag() }}
-  <dl>
-    {% for zone in zonesForm.zones %}
-      <h1>Zone {{ zone.number.data }}</h2>
-      <div>{{ zone.disabled.label }}: {{ zone.disabled }}</div>
-      <div>{{ zone.alias.label }}: {{ zone.alias }}</div>
-      <div>{{ zone.interval_days.label }}: {{ zone.interval_days }}</div>
-      <div>{{ zone.scheduled_time.label }}: {{ zone.scheduled_time }}</div>
-      <div>{{ zone.duration_minutes.label }}: {{ zone.duration_minutes }}</div>
-    {% endfor %}
-  </dl>
-  <p>{{ zonesForm.submit }}
+  {{ zonesForm.submit(class="btn btn-primary") }}
+  {% for zone in zonesForm.zones %}
+    <div class="panel panel-default">
+      <div class="panel-heading">Zone {{ zone.number.data }}</div>
+      <div class="form-check">{{ zone.disabled(class="form-check-input") }} {{ zone.disabled.label(class="form-check-label") }}</div>
+      <div class="form-group">{{ zone.alias.label }}: {{ zone.alias(class="form-control") }}</div>
+      <div class="form-group">{{ zone.interval_days.label }}: {{ zone.interval_days(class="form-control") }}</div>
+      <div class="form-group">{{ zone.scheduled_time.label }}: {{ zone.scheduled_time(class="form-control") }}</div>
+      <div class="form-group">{{ zone.duration_minutes.label }}: {{ zone.duration_minutes(class="form-control") }}</div>
+    </div>
+  {% endfor %}
+  {{ zonesForm.submit(class="btn btn-primary") }}
 </form>
 {% endblock %}
-</body>
-</html>

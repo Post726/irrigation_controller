@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, url_for
 from flask_wtf.csrf import CSRFProtect
+from flask_bootstrap import Bootstrap
 import json
 import os
 from config import Config
@@ -10,10 +11,10 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 csrf = CSRFProtect(app)
-
 db.init_app(app)
+bootstrap = Bootstrap(app)
 
-from models import Zone
+from models import Zone, Water
 from forms import ZoneForm, ZonesForm
 
 
@@ -43,16 +44,6 @@ def add_headers(response):
 @app.route("/")
 def home():
     return render_template("home.html")
-
-
-@app.route("/about")
-def about():
-    return render_template("about.html")
-
-
-@app.route("/data", methods=["GET"])
-def list_data():
-    return jsonify({'water': sql_helper.Water().get_list()})
 
 
 @app.route('/zones', methods=['GET', 'POST'])
@@ -87,6 +78,13 @@ def zones():
         return render_template('zones.html', zonesForm=zonesForm)
     
 
+@app.route('/data', methods=['GET'])
+def data():
+    water = Water.query.all()
+    
+    return render_template('data.html', water=water)
+    
+    
 if __name__ == "__main__":
     #db.drop_all()
     #db.session.commit()

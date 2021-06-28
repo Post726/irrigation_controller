@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="utf-8">
-    <title>Simple Flask Website</title>
-</head>
-<body>
-{% extends "template.html" %}
-{% block content %}
-<h1> Building a Simple Flask Website </h1>
-<p> Flask is a Fun and easy framework</p>
-<p> Flask and HTML in python looks cool</p>
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Welcome</h1>
 {% endblock %}
-</body>
-</html>
