@@ -8,3 +8,7 @@ flask_sqlalchemy
 WTForms
 Flask-WTF
 flask-bootstrap
+plotly
+numpy
+matplotlib
+pandas

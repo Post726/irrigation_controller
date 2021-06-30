@@ -7,6 +7,8 @@ from config import Config
 from models import db
 from irrigation import sql_helper
 
+from plot_helper import get_fig
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -83,8 +85,14 @@ def data():
     water = Water.query.all()
     
     return render_template('data.html', water=water)
-    
-    
+
+
+@app.route('/plot', methods=['GET'])
+def plot():
+    plot_json = get_fig(app)
+    return render_template('plot.html', plot_json=plot_json)
+
+
 if __name__ == "__main__":
     #db.drop_all()
     #db.session.commit()

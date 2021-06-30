@@ -14,6 +14,8 @@ sudo apt-get install python3-w1thermsensor
 
 sudo apt-get install gnome-schedule
 
+sudo apt-get install libatlas-base-dev
+
 sudo pip3 install --upgrade setuptools
 ```
 

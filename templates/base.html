@@ -1,5 +1,9 @@
 {% extends 'bootstrap/base.html' %}
 
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
 {% block title %}
     {% if title %}{{ title }} - {% endif %}Irrigation Controller
 {% endblock %}
@@ -21,6 +25,7 @@
                     <li><a href="{{ url_for('home') }}">Home</a></li>
                     <li><a href="{{ url_for('zones') }}">Zones</a></li>
                     <li><a href="{{ url_for('data') }}">Data</a></li>
+                    <li><a href="{{ url_for('plot') }}">Plot</a></li>
                 </ul>
             </div>
         </div>

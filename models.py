@@ -41,3 +41,11 @@ class Water(db.Model):
     start_ts = db.Column(db.DateTime, primary_key=True)
     end_ts = db.Column(db.DateTime)
     gallons = db.Column(db.Float)
+
+
+class Temperature(db.Model):
+    __tablename__ = 'temperature'
+    
+    ts = db.Column(db.DateTime, primary_key=True)
+    temp = db.Column(db.Float)
+    
