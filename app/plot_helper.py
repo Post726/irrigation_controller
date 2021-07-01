@@ -2,7 +2,7 @@ import pandas as pd
 import plotly
 import plotly.express as px
 import json
-from models import Water, Temperature
+from app.models import Water, Temperature
 from sqlalchemy.sql import column
 
 def get_fig(app):

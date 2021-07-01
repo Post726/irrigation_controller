@@ -7,15 +7,15 @@ import schedule
 import sys
 
 from flask import Flask, current_app
-import app
-from config import Config
-from models import db
+from app import app
+from app.config import Config
+from app.models import db
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 
-from models import Zone
+from app.models import Zone
 
 pins = {
     1: s1,

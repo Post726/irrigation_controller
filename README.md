@@ -16,6 +16,8 @@ sudo apt-get install gnome-schedule
 
 sudo apt-get install libatlas-base-dev
 
+sudo apt-get install redis-server
+
 sudo pip3 install --upgrade setuptools
 ```
 

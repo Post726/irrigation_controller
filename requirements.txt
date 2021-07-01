@@ -12,3 +12,5 @@ plotly
 numpy
 matplotlib
 pandas
+redis
+celery
