@@ -2,6 +2,7 @@
 
 {% block head %}
     {{ super() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 {% endblock %}
 
 {% block title %}
@@ -21,28 +22,44 @@
                 <a class="navbar-brand" href="{{ url_for('home') }}">Irrigation Controller</a>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav navbar-left">
                     <li><a href="{{ url_for('home') }}">Home</a></li>
                     <li><a href="{{ url_for('zones') }}">Zones</a></li>
                     <li><a href="{{ url_for('data') }}">Data</a></li>
                     <li><a href="{{ url_for('plot') }}">Plot</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% for i in range(1,7) %}
+                    <li><span id="zone-{{ i }}-status-label" class="label label-default">Zone {{ i }}</span></li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>
     </nav>
 {% endblock %}
 
-{% block content %}
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-info" role="alert">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-        {# application content needs to be provided in the app_content block #}
-        {% block app_content %}{% endblock %}
-    </div>
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        // Delay is the time in milliseconds
+        var delay = 5000;
+        
+        {% for i in range(1,7) %}
+            var refreshId = setInterval(function () {
+                $.get('{{ url_for('zone_status', zone=i) }}', function( data ) {
+                    console.log(data);
+                    if(data == "1") {
+                        console.log("active");
+                        $('#zone-{{ i }}-status-label').removeClass("label-default");
+                        $('#zone-{{ i }}-status-label').addClass("label-success");
+                    }
+                    else {
+                        console.log("inactive");
+                        $('#zone-{{ i }}-status-label').addClass("label-default");
+                        $('#zone-{{ i }}-status-label').removeClass("label-success");
+                    }
+                });
+            }, delay);
+        {% endfor %}
+    </script>
 {% endblock %}

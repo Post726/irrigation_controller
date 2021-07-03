@@ -3,17 +3,16 @@ from flask_wtf.csrf import CSRFProtect
 from flask_bootstrap import Bootstrap
 import json
 import os
+import time
+from app import app, board
 from app.config import Config
 from app.models import db
-from irrigation import sql_helper
 from app.plot_helper import get_fig
-
-import time
-# import scheduler
-
 from app.models import Zone, Water
 from app.forms import ZoneForm, ZonesForm
-from app import app
+from app.tasks import run_water
+from app.board import pins
+
 
 @app.context_processor
 def override_url_for():
@@ -66,6 +65,7 @@ def zones():
             zone.duration_minutes = zoneForm.data['duration_minutes']
         
         db.session.commit()
+        
         os.system('sudo systemctl restart irrigation')
         
         # create a message to send to the template
@@ -77,7 +77,7 @@ def zones():
 
 @app.route('/data', methods=['GET'])
 def data():
-    water = Water.query.all()
+    water = Water.query.order_by(Water.start_ts.desc()).all()
     
     return render_template('data.html', water=water)
 
@@ -86,3 +86,11 @@ def data():
 def plot():
     plot_json = get_fig(app)
     return render_template('plot.html', plot_json=plot_json)
+
+
+@app.route('/status/<int:zone>', methods=['GET'])
+def zone_status(zone):
+    status = board.get_state(pins[zone])
+    if status is None:
+        status = 'None status'
+    return str(status)

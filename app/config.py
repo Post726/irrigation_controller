@@ -11,6 +11,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
     result_backend = 'redis://localhost:6379/0'
+    DEBUG=None
 
 class ProductionConfig(Config):
     DEBUG = False
