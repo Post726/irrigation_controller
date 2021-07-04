@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import validators, SubmitField, HiddenField, StringField, IntegerField, BooleanField, TimeField, FieldList, FormField
+from wtforms import validators, SubmitField, HiddenField, StringField, IntegerField, BooleanField, TimeField, FieldList, FormField, RadioField
 from wtforms.fields import html5 as h5fields
 
 
@@ -15,3 +15,10 @@ class ZoneForm(FlaskForm):
 class ZonesForm(FlaskForm):
     zones = FieldList(FormField(ZoneForm), min_entries=6, max_entries=6)
     submit = SubmitField('Update')
+
+
+class RunNowForm(FlaskForm):
+    zone = RadioField('Zone', choices=[1,2,3,4,5,6])
+    duration = h5fields.IntegerField('Duration (minutes)', default=60)
+    submit = SubmitField('Run Now!')
+    

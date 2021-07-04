@@ -14,7 +14,7 @@ def get_fig(app):
     temp_query = Temperature.query
     temp_df = pd.read_sql(temp_query.statement, temp_query.session.bind)
     
-    fig = px.bar(water_df, x="start_ts", y="gallons", color="zone")
+    fig = px.scatter(water_df, x="start_ts", y="gallons", color="zone")
     #fig.add_line(temp_df, x="ts", y="temp")
         
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

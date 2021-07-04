@@ -9,7 +9,7 @@ from app.config import Config
 from app.models import db
 from app.plot_helper import get_fig
 from app.models import Zone, Water
-from app.forms import ZoneForm, ZonesForm
+from app.forms import ZoneForm, ZonesForm, RunNowForm
 from app.tasks import run_water
 from app.board import pins
 
@@ -70,9 +70,26 @@ def zones():
         
         # create a message to send to the template
         message = f"Zones Updated!"
-        return render_template('zones.html', zonesForm=zonesForm, message=message)
+        return render_template('zones.html', form=zonesForm, message=message)
     else:
-        return render_template('zones.html', zonesForm=zonesForm)
+        return render_template('zones.html', form=zonesForm)
+
+
+@app.route('/run_now', methods=['GET', 'POST'])
+def runNow():
+    runNowForm = RunNowForm()
+    
+    if runNowForm.validate_on_submit():
+        zone = Zone.query.get(runNowForm.data['zone'])
+        duration = runNowForm.data['duration']
+        
+        run_water.delay(zone.number, zone.alias, duration)
+        
+        # create a message to send to the template
+        message = f"Running!"
+        return render_template('run_now.html', form=runNowForm, message=message)
+    else:
+        return render_template('run_now.html', form=runNowForm)
     
 
 @app.route('/data', methods=['GET'])

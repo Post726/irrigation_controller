@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if zonesForm.errors %}
+    {% if form.errors %}
         <ul class="errors">
-            {% for field_name, field_errors in zonesForm.errors|dictsort if field_errors %}
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
                 {% for error in field_errors %}
-                    <li>{{ zonesForm[field_name].label }}: {{ error }}</li>
+                    <li>{{ form[field_name].label }}: {{ error }}</li>
                 {% endfor %}
             {% endfor %}
         </ul>
@@ -19,9 +19,9 @@
     {% endif %}
 
     <form method='post' class="navbar-form navbar-left">
-      {{ zonesForm.hidden_tag() }}
-      {{ zonesForm.submit(class="btn btn-primary") }}
-      {% for zone in zonesForm.zones %}
+      {{ form.hidden_tag() }}
+      {{ form.submit(class="btn btn-primary") }}
+      {% for zone in form.zones %}
         <div class="panel panel-default">
           <div class="panel-heading">Zone {{ zone.number.data }}</div>
           <div class="form-check">{{ zone.disabled(class="form-check-input") }} {{ zone.disabled.label(class="form-check-label") }}</div>
@@ -31,6 +31,6 @@
           <div class="form-group">{{ zone.duration_minutes.label }}: {{ zone.duration_minutes(class="form-control") }}</div>
         </div>
       {% endfor %}
-      {{ zonesForm.submit(class="btn btn-primary") }}
+      {{ form.submit(class="btn btn-primary") }}
     </form>
 {% endblock %}
