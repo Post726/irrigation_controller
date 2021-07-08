@@ -9,6 +9,10 @@ class Config(object):
     SECRET_KEY = 'MLXH243GssUWwKdTWS7FDhdwYF56wPj8'
     SQLALCHEMY_DATABASE_URI = 'mariadb+mariadbconnector://irrigation:cali@localhost/irrigation'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+    }
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
     result_backend = 'redis://localhost:6379/0'
     DEBUG=None

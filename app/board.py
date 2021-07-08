@@ -66,6 +66,7 @@ class Board:
         self.therm_sens = W1ThermSensor()
         
         self.setup_pins()
+        
 
     def setup_pins(self):
         #Set GPIO pins to use BCM pin numbers
@@ -94,14 +95,17 @@ class Board:
         
         
     def register_flow(self):
-        def flow_trig(self):
+        def flow_trig(channel):
             global water_tick
             water_tick += 1
-     
-        GPIO.add_event_detect(fs, GPIO.FALLING) # Event to detect flow (1 tick per revolution)
-        GPIO.add_event_callback(fs, flow_trig)
-
-
+        
+        GPIO.add_event_detect(fs, GPIO.FALLING, callback=flow_trig) # Event to detect flow (1 tick per revolution)
+    
+    
+    def deregister_flow(self):
+        GPIO.remove_event_detect(fs)
+        
+        
     def set_low(self, pin):
         GPIO.output(pin, GPIO.LOW)
 

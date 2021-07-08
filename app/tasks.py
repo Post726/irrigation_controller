@@ -33,6 +33,7 @@ app.app_context().push()
 def run_water(zone, alias, minutes):
     start_time = datetime.now()
     b = Board() # init a new board since tasks dont seem to have GPIO setup...
+    b.register_flow()
     
     temperature = b.get_temp()
     db.session.add(Temperature(temperature))
@@ -51,3 +52,5 @@ def run_water(zone, alias, minutes):
     water_used = b.read_water_flow()
     db.session.add(Water(zone, alias, start_time, water_used))
     db.session.commit()
+    
+    b.deregister_flow()
