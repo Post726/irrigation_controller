@@ -18,7 +18,7 @@ class ZonesForm(FlaskForm):
 
 
 class RunNowForm(FlaskForm):
-    zone = RadioField('Zone', choices=[1,2,3,4,5,6])
+    zone = RadioField('Zone', choices=[])
     duration = h5fields.IntegerField('Duration (minutes)', default=60)
     submit = SubmitField('Run Now!')
     

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_bootstrap import Bootstrap
+from sqlalchemy.sql import column
 import json
 import os
 import time
@@ -78,6 +79,7 @@ def zones():
 @app.route('/run_now', methods=['GET', 'POST'])
 def runNow():
     runNowForm = RunNowForm()
+    runNowForm.zone.choices = [(zone.number, zone.alias) for zone in Zone.query.where(~column('disabled')).all()]
     
     if runNowForm.validate_on_submit():
         zone = Zone.query.get(runNowForm.data['zone'])
