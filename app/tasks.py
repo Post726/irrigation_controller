@@ -1,13 +1,11 @@
 from app import app, celery, board
-from app.models import db, Zone, Water, Temperature
+from app.database import SessionLocal, engine
+from app.models import Zone, Water, Temperature
 from app.board import pins, Board
 import os
 import time
 from datetime import datetime
 
-
-# setting up the context for SQLAlchemy
-app.app_context().push()
 
 
 # This is not working. Only seem able to setup schedule at app start
@@ -31,26 +29,27 @@ app.app_context().push()
 
 @celery.task
 def run_water(zone, alias, minutes):
-    start_time = datetime.now()
-    b = Board() # init a new board since tasks dont seem to have GPIO setup...
-    b.register_flow()
-    
-    temperature = b.get_temp()
-    db.session.add(Temperature(temperature))
-    db.session.commit()
-    
-#     moisture0 = board.read_analog_sensor(analog0)
-#     moisture1 = board.read_analog_sensor(analog1)
-#     moisture2 = board.read_analog_sensor(analog2)
-#     moisture3 = board.read_analog_sensor(analog3)
-#     sql_helper.insert_moistures(moisture0, moisture1, moisture2, moisture3)
-    
-    b.set_high(pins[zone])
-    time.sleep(minutes*60) # sleep for our duration with the solenoid open 
-    b.set_low(pins[zone])
-    
-    water_used = b.read_water_flow()
-    db.session.add(Water(zone, alias, start_time, water_used))
-    db.session.commit()
-    
-    b.deregister_flow()
+    with SessionLocal() as db:
+        start_time = datetime.now()
+        b = Board() # init a new board since tasks dont seem to have GPIO setup...
+        b.register_flow()
+        
+        temperature = b.get_temp()
+        db.add(Temperature(temperature))
+        db.commit()
+        
+    #     moisture0 = board.read_analog_sensor(analog0)
+    #     moisture1 = board.read_analog_sensor(analog1)
+    #     moisture2 = board.read_analog_sensor(analog2)
+    #     moisture3 = board.read_analog_sensor(analog3)
+    #     sql_helper.insert_moistures(moisture0, moisture1, moisture2, moisture3)
+        
+        b.set_high(pins[zone])
+        time.sleep(minutes*60) # sleep for our duration with the solenoid open 
+        b.set_low(pins[zone])
+        
+        water_used = b.read_water_flow()
+        db.add(Water(zone, alias, start_time, water_used))
+        db.commit()
+        
+        b.deregister_flow()

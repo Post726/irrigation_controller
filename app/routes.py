@@ -7,7 +7,6 @@ import os
 import time
 from app import app, board
 from app.config import Config
-from app.models import db
 from app.plot_helper import get_fig
 from app.models import Zone, Water
 from app.forms import ZoneForm, ZonesForm, RunNowForm
@@ -18,6 +17,11 @@ from app.board import pins
 @app.context_processor
 def override_url_for():
     return dict(url_for=dated_url_for)
+
+
+@app.teardown_appcontext
+def remove_session(*args, **kwargs):
+    app.session.remove()
 
 
 def dated_url_for(endpoint, **values):
@@ -47,7 +51,7 @@ def home():
 def zones():
     zoneList = []
     for i in range(1,7):
-        zoneList.append(Zone.query.get(i))
+        zoneList.append(app.session.query(Zone).get(i))
         
     data = {
         'zones': zoneList
@@ -57,7 +61,7 @@ def zones():
         
     if zonesForm.validate_on_submit():
         for zoneForm in zonesForm.zones.entries:
-            zone = Zone.query.get(zoneForm.data['number'])
+            zone = app.session.query(Zone).get(zoneForm.data['number'])
             
             zone.alias = zoneForm.data['alias']
             zone.disabled = bool(zoneForm.data.get('disabled', False))
@@ -65,7 +69,7 @@ def zones():
             zone.scheduled_time = zoneForm.data['scheduled_time']
             zone.duration_minutes = zoneForm.data['duration_minutes']
         
-        db.session.commit()
+        app.session.commit()
         
         os.system('sudo systemctl restart irrigation')
         
@@ -79,10 +83,10 @@ def zones():
 @app.route('/run_now', methods=['GET', 'POST'])
 def runNow():
     runNowForm = RunNowForm()
-    runNowForm.zone.choices = [(zone.number, zone.alias) for zone in Zone.query.where(~column('disabled')).all()]
+    runNowForm.zone.choices = [(zone.number, zone.alias) for zone in app.session.query(Zone).where(~column('disabled')).all()]
     
     if runNowForm.validate_on_submit():
-        zone = Zone.query.get(runNowForm.data['zone'])
+        zone = app.session.query(Zone).get(runNowForm.data['zone'])
         duration = runNowForm.data['duration']
         
         run_water.delay(zone.number, zone.alias, duration)
@@ -96,7 +100,7 @@ def runNow():
 
 @app.route('/data', methods=['GET'])
 def data():
-    water = Water.query.order_by(Water.start_ts.desc()).all()
+    water = app.session.query(Water).order_by(Water.start_ts.desc()).all()
     
     return render_template('data.html', water=water)
 

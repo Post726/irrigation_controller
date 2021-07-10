@@ -6,17 +6,13 @@ import sys
 from flask import Flask, current_app
 from app import app
 from app.config import Config
-from app.models import db
+from app.database import SessionLocal, engine
 
 import logging
 
 # logging.basicConfig()
 # schedule_logger = logging.getLogger('schedule')
 # schedule_logger.setLevel(level=logging.DEBUG)
-
-app = Flask(__name__)
-app.config.from_object(Config)
-db.init_app(app)
 
 from app.models import Zone
 
@@ -32,8 +28,8 @@ if __name__ == "__main__":
     
     # tasks.run_water(1, "tomatoes", 10)
     
-    with app.app_context():
-        for zone in Zone.query.all():
+    with SessionLocal() as db:
+        for zone in db.query(Zone).all():
             if not zone.disabled:
                 print(zone.alias)
                 schedule.every(zone.interval_days).day.at(zone.scheduled_time.strftime("%H:%M")).do(run_water, zone.number, zone.alias, zone.duration_minutes)

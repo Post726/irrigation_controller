@@ -1,16 +1,18 @@
-from flask import Flask
+from flask import Flask, _app_ctx_stack
 from app.config import Config
 from flask_wtf.csrf import CSRFProtect
-from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from celery import Celery
 from app.board import Board
+from sqlalchemy.orm import scoped_session
+from .database import SessionLocal, engine
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-db = SQLAlchemy(app)
+app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
+
 csrf = CSRFProtect(app)
 bootstrap = Bootstrap(app)
 

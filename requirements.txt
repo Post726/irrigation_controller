@@ -4,7 +4,6 @@ adafruit-circuitpython-ads1x15
 mariadb
 pyyaml
 schedule
-flask_sqlalchemy
 WTForms
 Flask-WTF
 flask-bootstrap
