@@ -1,0 +1,13 @@
+[Unit]
+Description=Irrigation Controller
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/wksp/irrigation_controller/controller.py
+Restart=on-failure
+RestartSec=5s
+StandardOutput=syslog+console
+ 
+[Install]
+WantedBy=multi-user.target

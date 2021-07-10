@@ -53,26 +53,16 @@ password: some-password
 EOF
 ```
 
-5) Setup service
-/etc/systemd/system/water.service
+5) Setup services
 ```
-[Unit]
-Description=Measure Water
-After=multi-user.target
- 
-[Service]
-Type=simple
-ExecStart=/usr/bin/python3 /home/pi/wksp/irrigation_controller/measure_water.py
-Restart=on-abort
- 
-[Install]
-WantedBy=multi-user.target
-```
-
-```
-sudo chmod 644 /etc/systemd/system/water.service
-chmod +x /home/pi/wksp/irrigation_controller/measure_water.py
+sudo chmod 644 setup/systemd/system/*
+sudo cp setup/systemd/system/* /etc/systemd/system/
+sudo cp setup/conf.d/* /etc/conf.d/
 sudo systemctl daemon-reload
-sudo systemctl enable water
-sudo systemctl start water
+sudo systemctl enable irrigation
+sudo systemctl enable celery
+sudo systemctl enable uwsgi
+sudo systemctl start irrigation
+sudo systemctl start celery
+sudo systemctl start uwsgi
 ```
