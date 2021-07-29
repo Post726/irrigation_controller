@@ -32,7 +32,7 @@ if __name__ == "__main__":
         for zone in db.query(Zone).all():
             if not zone.disabled:
                 print(zone.alias)
-                schedule.every(zone.interval_days).day.at(zone.scheduled_time.strftime("%H:%M")).do(run_water, zone.number, zone.alias, zone.duration_minutes)
+                schedule.every(zone.interval_days).days.at(zone.scheduled_time.strftime("%H:%M")).do(run_water, zone.number, zone.alias, zone.duration_minutes)
     
     sys.stdout.flush() # helps with logging in systemctl
     
