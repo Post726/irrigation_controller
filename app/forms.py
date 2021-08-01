@@ -6,6 +6,11 @@ from wtforms.fields import html5 as h5fields
 class ZoneForm(FlaskForm):
     number = HiddenField('ID')
     alias = StringField('Name', [validators.optional()])
+
+
+class ScheduleForm(FlaskForm):
+    number = HiddenField('ID')
+    zone = h5fields.IntegerField('zone', [validators.optional(), validators.NumberRange(1,6)])
     disabled = BooleanField('Disabled', [validators.optional()])
     interval_days = h5fields.IntegerField('Interval (days)', [validators.optional()])
     scheduled_time = h5fields.TimeField('Time', [validators.optional()])
@@ -14,8 +19,9 @@ class ZoneForm(FlaskForm):
  
 class ZonesForm(FlaskForm):
     zones = FieldList(FormField(ZoneForm), min_entries=6, max_entries=6)
+    schedules = FieldList(FormField(ScheduleForm), min_entries=12, max_entries=12)
     submit = SubmitField('Update')
-
+    
 
 class RunNowForm(FlaskForm):
     zone = RadioField('Zone', choices=[])

@@ -8,7 +8,7 @@ import time
 from app import app, board
 from app.config import Config
 from app.plot_helper import get_fig
-from app.models import Zone, Water
+from app.models import Zone, Water, Schedule
 from app.forms import ZoneForm, ZonesForm, RunNowForm
 from app.tasks import run_water
 from app.board import pins
@@ -49,12 +49,12 @@ def home():
 
 @app.route('/zones', methods=['GET', 'POST'])
 def zones():
-    zoneList = []
-    for i in range(1,7):
-        zoneList.append(app.session.query(Zone).get(i))
+    zoneList = app.session.query(Zone).all()
+    scheduleList = app.session.query(Schedule).all()
         
     data = {
-        'zones': zoneList
+        'zones': zoneList,
+        'schedules': scheduleList
         }
     
     zonesForm = ZonesForm(data=data)
@@ -64,10 +64,15 @@ def zones():
             zone = app.session.query(Zone).get(zoneForm.data['number'])
             
             zone.alias = zoneForm.data['alias']
-            zone.disabled = bool(zoneForm.data.get('disabled', False))
-            zone.interval_days = zoneForm.data['interval_days']
-            zone.scheduled_time = zoneForm.data['scheduled_time']
-            zone.duration_minutes = zoneForm.data['duration_minutes']
+            
+        for scheduleForm in zonesForm.schedules.entries:
+            sched = app.session.query(Schedule).get(scheduleForm.data['number'])
+            
+            sched.zone = scheduleForm.data['zone']
+            sched.disabled = bool(scheduleForm.data.get('disabled', False))
+            sched.interval_days = scheduleForm.data['interval_days']
+            sched.scheduled_time = scheduleForm.data['scheduled_time']
+            sched.duration_minutes = scheduleForm.data['duration_minutes']
         
         app.session.commit()
         
@@ -83,7 +88,7 @@ def zones():
 @app.route('/run_now', methods=['GET', 'POST'])
 def runNow():
     runNowForm = RunNowForm()
-    runNowForm.zone.choices = [(zone.number, zone.alias) for zone in app.session.query(Zone).where(~column('disabled')).all()]
+    runNowForm.zone.choices = [(zone.number, zone.alias or "Not Set") for zone in app.session.query(Zone).all()]
     
     if runNowForm.validate_on_submit():
         zone = app.session.query(Zone).get(runNowForm.data['zone'])

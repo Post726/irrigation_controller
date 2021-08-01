@@ -14,7 +14,7 @@ import logging
 # schedule_logger = logging.getLogger('schedule')
 # schedule_logger.setLevel(level=logging.DEBUG)
 
-from app.models import Zone
+import app.models as models
 
 def run_water(zone, alias, minutes):
     print(f"watering Zone {zone} ({alias}) for {minutes} minutes")
@@ -29,10 +29,15 @@ if __name__ == "__main__":
     # tasks.run_water(1, "tomatoes", 10)
     
     with SessionLocal() as db:
-        for zone in db.query(Zone).all():
-            if not zone.disabled:
+        #models.Base.metadata.create_all(bind=engine)
+        #models.init_zones(db)
+        #models.init_schedules(db)
+        
+        for sched in db.query(models.Schedule).all():
+            if not sched.disabled:
+                zone = db.query(models.Zone).get(sched.zone)
                 print(zone.alias)
-                schedule.every(zone.interval_days).days.at(zone.scheduled_time.strftime("%H:%M")).do(run_water, zone.number, zone.alias, zone.duration_minutes)
+                schedule.every(sched.interval_days).days.at(sched.scheduled_time.strftime("%H:%M")).do(run_water, sched.zone, zone.alias, sched.duration_minutes)
     
     sys.stdout.flush() # helps with logging in systemctl
     
