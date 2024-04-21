@@ -1,17 +1,18 @@
+import json
+import os
+import time
 from flask import Flask, render_template, request, jsonify, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_bootstrap import Bootstrap
 from sqlalchemy.sql import column
-import json
-import os
-import time
 from app import app, board
 from app.config import Config
-from app.plot_helper import get_fig
-from app.models import Zone, Water, Schedule
-from app.forms import ZoneForm, ZonesForm, RunNowForm
+import app.plot_helper as plot_helper
 from app.tasks import run_water
 from app.board import pins
+
+from app.models import *
+from app.forms import *
 
 
 @app.context_processor
@@ -50,11 +51,9 @@ def home():
 @app.route('/zones', methods=['GET', 'POST'])
 def zones():
     zoneList = app.session.query(Zone).all()
-    scheduleList = app.session.query(Schedule).all()
         
     data = {
         'zones': zoneList,
-        'schedules': scheduleList
         }
     
     zonesForm = ZonesForm(data=data)
@@ -64,8 +63,34 @@ def zones():
             zone = app.session.query(Zone).get(zoneForm.data['number'])
             
             zone.alias = zoneForm.data['alias']
-            
-        for scheduleForm in zonesForm.schedules.entries:
+        
+        app.session.commit()
+                
+        # create a message to send to the template
+        message = f"Zones Updated!"
+        return render_template('zones.html', form=zonesForm, message=message)
+    else:
+        return render_template('zones.html', form=zonesForm)
+
+
+@app.route('/schedules', methods=['GET', 'POST'])
+def schedules():
+    zoneList = app.session.query(Zone).all()
+    scheduleList = app.session.query(Schedule).all()
+    
+    data = {
+        'schedules': scheduleList
+        }
+    
+    schedulesForm = SchedulesForm(data=data)
+    
+    for scheduleForm in schedulesForm.schedules.entries:
+        scheduleForm.zone.choices = [(zone.number, zone.alias or "Not Set") for zone in zoneList]
+        
+    plot_json = plot_helper.plot_timeline(app)
+        
+    if schedulesForm.validate_on_submit():
+        for scheduleForm in schedulesForm.schedules.entries:
             sched = app.session.query(Schedule).get(scheduleForm.data['number'])
             
             sched.zone = scheduleForm.data['zone']
@@ -79,10 +104,10 @@ def zones():
         os.system('sudo systemctl restart irrigation')
         
         # create a message to send to the template
-        message = f"Zones Updated!"
-        return render_template('zones.html', form=zonesForm, message=message)
+        message = f"Schedules Updated!"
+        return render_template('schedules.html', form=schedulesForm, plot_json=plot_json, message=message)
     else:
-        return render_template('zones.html', form=zonesForm)
+        return render_template('schedules.html', form=schedulesForm, plot_json=plot_json)
 
 
 @app.route('/run_now', methods=['GET', 'POST'])
@@ -112,7 +137,7 @@ def data():
 
 @app.route('/plot', methods=['GET'])
 def plot():
-    plot_json = get_fig(app)
+    plot_json = plot_helper.plot_water(app)
     return render_template('plot.html', plot_json=plot_json)
 
 

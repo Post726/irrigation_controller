@@ -27,16 +27,6 @@
           <div class="form-group">{{ zone.alias.label }}: {{ zone.alias(class="form-control") }}</div>
         </div>
       {% endfor %}
-      {% for sched in form.schedules %}
-        <div class="panel panel-default">
-          <div class="panel-heading">Schedule {{ sched.number.data }}</div>
-          <div class="form-check">{{ sched.disabled(class="form-check-input") }} {{ sched.disabled.label(class="form-check-label") }}</div>
-          <div class="form-group">{{ sched.zone.label }}: {{ sched.zone(class="form-control") }}</div>
-          <div class="form-group">{{ sched.interval_days.label }}: {{ sched.interval_days(class="form-control") }}</div>
-          <div class="form-group">{{ sched.scheduled_time.label }}: {{ sched.scheduled_time(class="form-control") }}</div>
-          <div class="form-group">{{ sched.duration_minutes.label }}: {{ sched.duration_minutes(class="form-control") }}</div>
-        </div>
-      {% endfor %}
       {{ form.submit(class="btn btn-primary") }}
     </form>
 {% endblock %}
